@@ -32,6 +32,7 @@ public class EsBulkProcessorConfig {
             public void beforeBulk(long executionId, BulkRequest request) {
                 int i = request.numberOfActions();
 //                log.error("ES 同步数量{}",i);
+
             }
 
             @Override
