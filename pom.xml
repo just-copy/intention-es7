@@ -9,9 +9,8 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.justcp</groupId>
-    <artifactId>es7</artifactId>
+    <artifactId>intention</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>es7</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>
