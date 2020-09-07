@@ -15,14 +15,12 @@ import javax.annotation.Resource;
 import java.util.Iterator;
 import java.util.function.BiConsumer;
 
-@Component
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class EsBulkProcessorConfig {
 
-    @Resource
-    private RestHighLevelClient client;
-
-    @Bean(name = "bulkProcessor")
-    public BulkProcessor bulkProcessor(){
+    public static BulkProcessor bulkProcessor(RestHighLevelClient client){
 
         BiConsumer<BulkRequest, ActionListener<BulkResponse>> bulkConsumer =
                 (request, bulkListener) -> client.bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
@@ -31,7 +29,7 @@ public class EsBulkProcessorConfig {
             @Override
             public void beforeBulk(long executionId, BulkRequest request) {
                 int i = request.numberOfActions();
-//                log.error("ES 同步数量{}",i);
+                log.info("executionId: " + executionId + ", num to execute: " + request.numberOfActions());
 
             }
 
@@ -39,19 +37,38 @@ public class EsBulkProcessorConfig {
             public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
                 // todo do something
                 Iterator<BulkItemResponse> iterator = response.iterator();
-                while (iterator.hasNext()){
-//                    System.out.println(JSON.toJSONString(iterator.next()));
+                long cntSuccess = 0,cntFail = 0,cntConflict = 0;
+                while (iterator.hasNext()) {
+                    BulkItemResponse BulkResponse = iterator.next();
+                    switch (BulkResponse.status()) {
+                        case OK:
+                            cntSuccess ++;
+                            break;
+                        case CREATED:
+                            cntSuccess ++;
+                            break;
+                        case ACCEPTED:
+                            cntSuccess++;
+                            break;
+                        case CONFLICT:
+                            cntConflict++;
+                            break;
+                        default:
+                            cntFail++;
+                    }
                 }
+                log.info("executionId: " + executionId + ", num success: " + cntSuccess +
+                        ", num fail: " + cntFail +", num conflict: " + cntConflict);
             }
 
             @Override
             public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-//                log.error("写入ES 重新消费");
+                log.error("executionId: " + executionId + ", FAILURE MESSAGE: " + failure.getMessage());
             }
-        }).setBulkActions(1000) //  达到刷新的条数
-                .setBulkSize(new ByteSizeValue(2, ByteSizeUnit.MB)) // 达到 刷新的大小
+        }).setBulkActions(2000) //  达到刷新的条数
+                .setBulkSize(new ByteSizeValue(3, ByteSizeUnit.MB)) // 达到 刷新的大小
                 .setFlushInterval(TimeValue.timeValueSeconds(5)) // 固定刷新的时间频率
-                .setConcurrentRequests(2) //并发线程数
+                .setConcurrentRequests(1) //并发线程数
                 .setBackoffPolicy(BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3)) // 重试补偿策略
                 .build();
 

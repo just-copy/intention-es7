@@ -1,6 +1,8 @@
 package com.justcp.es7.controller;
 
 import com.justcp.es7.service.EsService;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,5 +19,10 @@ public class EsController {
     @GetMapping(value = "/insert")
     public void insertEs() {
         esService.insertBatch();
+    }
+
+    @DeleteMapping(value = "/delete")
+    public void deleteEs() {
+        esService.deleteByQuery();
     }
 }
