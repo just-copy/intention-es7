@@ -5,4 +5,6 @@ import org.springframework.stereotype.Service;
 public interface EsService {
 
     void insertBatch();
+
+    void deleteByQuery();
 }
