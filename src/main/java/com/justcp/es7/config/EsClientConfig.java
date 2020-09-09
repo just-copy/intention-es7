@@ -6,6 +6,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +16,17 @@ import javax.annotation.Resource;
 @Slf4j
 public class EsClientConfig {
 
+    @Value("${research.es7.es.servers}")
+    private String esHostname;
+
+    @Value("${research.es7.es.port}")
+    private int port;
+
     @Bean
     public RestHighLevelClient getRestHighLevelClient(){
         RestHighLevelClient client = new RestHighLevelClient(
                 //如果是集群再配置多个
-                RestClient.builder(new HttpHost("172.18.18.15",8386,"http"))
+                RestClient.builder(new HttpHost(esHostname, port, "http"))
                         .setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback() {
                             // 该方法接收一个RequestConfig.Builder对象，对该对象进行修改后然后返回。
                             @Override

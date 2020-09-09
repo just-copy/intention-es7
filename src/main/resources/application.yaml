@@ -1,0 +1,14 @@
+server:
+  port: 8081
+logging:
+  config: classpath:logback.xml
+
+
+research:
+  es7:
+    es:
+      index:
+        devInex: index_dev
+      servers: 172.18.18.15
+      port: 8386
+

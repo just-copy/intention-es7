@@ -28,14 +28,12 @@ public class EsBulkProcessorConfig {
         return BulkProcessor.builder(bulkConsumer, new BulkProcessor.Listener() {
             @Override
             public void beforeBulk(long executionId, BulkRequest request) {
-                int i = request.numberOfActions();
                 log.info("executionId: " + executionId + ", num to execute: " + request.numberOfActions());
 
             }
 
             @Override
             public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-                // todo do something
                 Iterator<BulkItemResponse> iterator = response.iterator();
                 long cntSuccess = 0,cntFail = 0,cntConflict = 0;
                 while (iterator.hasNext()) {

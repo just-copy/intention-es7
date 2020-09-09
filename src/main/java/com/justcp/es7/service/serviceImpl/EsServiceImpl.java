@@ -13,6 +13,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -31,6 +32,9 @@ public class EsServiceImpl implements EsService {
     @Resource
     private RestHighLevelClient client;
 
+    @Value("${research.es7.es.index.devInex}")
+    private String devIndex;
+
     @Override
     public void insertBatch() {
         try {
@@ -43,8 +47,7 @@ public class EsServiceImpl implements EsService {
                 while ((json = br.readLine()) != null) {
                     JSONObject jsonObject =JSONObject.parseObject(json);
                     jsonObject.put("instanceId", count / 1000 + 1);
-                    jsonObject.put("type", "query");
-                    bulkProcessor.add(new IndexRequest("index_dev").source(jsonObject.toJSONString(), XContentType.JSON));
+                    bulkProcessor.add(new IndexRequest(devIndex).source(jsonObject.toJSONString(), XContentType.JSON));
                     //每一千条提交一次
                     count++;
                 }
@@ -67,10 +70,10 @@ public class EsServiceImpl implements EsService {
     @Override
     public void deleteByQuery() {
         DeleteByQueryRequest request =
-                new DeleteByQueryRequest("index_dev");
+                new DeleteByQueryRequest(devIndex);
         request.setConflicts("proceed");
         // 并行
-        request.setSlices(2);
+        request.setSlices(1);
         // 使用滚动参数来控制“搜索上下文”存活的时间
         request.setScroll(TimeValue.timeValueMinutes(10));
         // 超时
