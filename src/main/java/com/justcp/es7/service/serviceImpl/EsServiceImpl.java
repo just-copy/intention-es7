@@ -81,6 +81,8 @@ public class EsServiceImpl implements EsService {
         // 刷新索引
         request.setRefresh(true);
 
+        request.setBatchSize(2000);
+
         QueryBuilder qb = QueryBuilders.boolQuery()
                 .mustNot(QueryBuilders.existsQuery("instanceIds"));
         request.setQuery(qb);
